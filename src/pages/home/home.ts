@@ -9,7 +9,11 @@ import { NavController } from 'ionic-angular';
 export class HomePage {
 
   constructor(public navCtrl: NavController) {
-
+     this.getProps();
   }
+
+  private getProps() : any {
+      return {name:"name"};
+ }
 
 }
