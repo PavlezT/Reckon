@@ -1,6 +1,11 @@
-import { Component } from '@angular/core';
-
-import { NavController, AlertController } from 'ionic-angular';
+import { Component,  Inject } from '@angular/core';
+import { Http } from '@angular/http';
+import { NavController, AlertController, ToastController } from 'ionic-angular';
+import { Device } from 'ionic-native';
+import 'rxjs/add/operator/toPromise';
+import 'rxjs/add/operator/timeout';
+import 'rxjs/add/operator/retry';
+import { consts } from '../../config/consts';
 
 @Component({
   selector: 'page-about',
@@ -11,12 +16,19 @@ export class Tasks {
    tasks : any;
    selectedTask : any;
 
-  constructor(public navCtrl: NavController,public alertCtrl: AlertController) {
-      this.getTasks().then(data =>{this.tasks = data} );
+  constructor(public navCtrl: NavController,public alertCtrl: AlertController, public toastCtrl: ToastController,@Inject(Http) public http : Http) {
+      this.getTasks().then(data =>{this.tasks = data;} );
   }
 
   public getTasks() : Promise<any> {
-     return Promise.resolve([{name:"name1",id:12},{name:"name 2",id:11}]);
+     let url = `${consts.url}/tasks/all`;
+
+     return this.http.get(url).toPromise()
+      .then(data => {return data.json()})
+      .catch(error => {
+         console.error('<Tasks> getTasks error:',error);
+         return [];
+      })
   }
 
    public taskClicked(task) : void {
@@ -47,8 +59,31 @@ export class Tasks {
        prompt.present();
    }
 
+   private showToast(message: any){
+      let toast = this.toastCtrl.create({
+        message: (typeof message == 'string' )? message : message.toString().substring(0,( message.toString().indexOf('&#x') || message.toString().length)) ,
+        position: 'bottom',
+        showCloseButton : true,
+        duration: 9000
+      });
+      toast.present();
+ }
+
    public changeActiveTask() : void {
-      console.log('task changing')
+      let url = `${consts.url}/tasks/active`;
+      let data = {
+         id_device : Device.uuid || 123,
+         id_task : this.selectedTask.id
+      }
+
+      this.http.post(url,data).timeout(consts.timeout).retry(consts.retry).toPromise()
+         .then(res => {
+            console.log('res',res);
+         })
+         .catch(error=>{
+            console.error('<Tasks> changeActiveTask error:',error)
+            this.showToast('Can`t accept working this task on your devcie:'+ (error.json().error||''));
+         })
    }
 
 }

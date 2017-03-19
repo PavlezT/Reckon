@@ -6,6 +6,14 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
    <h3 *ngIf="!task">There is no active task</h3>
+   <ion-item *ngIf="task" >
+      <h3>{{task.title}}</h3>
+      <p>id:{{task.id}}</p>
+      <p *ngIf="task.description">Description : {{task.description}}</p>
+      <p *ngIf="task.author">Author : {{task.author}}</p>
+      <p>Created: {{task.created}}</p>
+   </ion-item>
+
 </ion-content>

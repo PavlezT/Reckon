@@ -1,16 +1,20 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Tasks
+      All Tasks
     </ion-title>
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content >
    <ion-list *ngFor="let task of tasks">
       <ion-item (click)="taskClicked(task)">
-         <p>id {{task.id}}, {{task.name}}</p>
+         <h3>{{task.title}}</h3>
+         <p>id:{{task.id}}</p>
+         <p *ngIf="task.description">Description : {{task.description}}</p>
+         <p *ngIf="task.author">Author : {{task.author}}</p>
+         <p>Created: {{task.created}}</p>
       </ion-item>
    </ion-list>
-   <h3 *ngIf="!tasks">There is no tasks</h3>
+   <h3 padding *ngIf="!tasks || tasks.length == 0">There is no tasks</h3>
 </ion-content>
