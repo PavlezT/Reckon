@@ -19,8 +19,11 @@ var Task = new Schema({
     title: { type: String, required: true },
     author: { type: String, required: true },
     description: { type: String, required: false },
-    id : {type: String, required : false, default: uuid.v1 },
-    created : { type: Date, default: Date.now }
+    type : { type: String, required: true },
+    data : Schema.Types.Mixed,
+    id : { type: String, required : false, default: uuid.v1 },
+    created : { type: Date, default: Date.now },
+    status : { type : String, default : 'New' }
 });
 
 var Device = new Schema({
@@ -33,6 +36,14 @@ var Device = new Schema({
    working_task : {type : String, required : false}
 })
 
+var Part = new Schema({
+   id : { type : String, required : false, default: uuid.v4 },
+   task_id : { type: String, required : true },
+   data : Schema.Types.Mixed,
+   result : Schema.Types.Mixed,
+   device : { type : String, required : false, default : 'no' }
+})
+
 // validation
 Task.path('title').validate(function (v) {
     return v.length > 1 && v.length < 70;
@@ -40,6 +51,7 @@ Task.path('title').validate(function (v) {
 
 var TaskModel = mongoose.model('Task', Task);
 var DeviceModel = mongoose.model('Device',Device);
+var PartsModel = mongoose.model('Part',Part);
 
 // var tasks = new TaskModel({title:'first',author:'admin',description:'Testing task'});
 // tasks.save(function (err) {
@@ -50,5 +62,12 @@ var DeviceModel = mongoose.model('Device',Device);
 //   }
 // });
 
+// var part = new PartsModel({task_id:'44ec3e40-0cb0-11e7-931e-6dcf296d1c23',data:'lorem ipsum'});
+// part.save(function(err){
+//    if(err)console.log('error part save',err)
+//    else console.log('saved')
+// })
+
 module.exports.TaskModel = TaskModel;
 module.exports.DeviceModel = DeviceModel;
+module.exports.PartsModel = PartsModel;

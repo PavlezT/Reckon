@@ -1,6 +1,7 @@
 var express = require('express');
 var TaskModel    = require('../libs/mongoose').TaskModel;
 var DeviceModel    = require('../libs/mongoose').DeviceModel;
+var PartsModel = require('../libs/mongoose').PartsModel;
 var log         = require('../libs/log')(module);
 var router = express.Router();
 
@@ -50,11 +51,71 @@ router.get('/active',function(req,res,next){
       if(err || !device)errorHandler(res,err,'Can`t find device')
       else {
          return TaskModel.findOne({id: device.working_task},function(err,task){
-            if(err || !task)errorHandler(res,err,'Can`t find working task');
-            else return res.send(task);
+            if(err || !task){
+               res.statusCode = 400;
+               log.error('<TaskModel> (%d) find: %s',res.statusCode,JSON.stringify(err));
+               return res.send({ error: err, device : device });
+            }
+            else {
+               return res.send({task:task,device:device});
+            }
          })
       }
    })
+})
+
+router.get('/dotask',function(req,res,next){
+   var incom = req.query;
+
+   return TaskModel.findOne({id:incom.id_task},function(err,task){
+      if(err || !task)errorHandler(res,err,'There is no task');
+      else {
+         return getDoTaskData(incom,res,task);
+      }
+   })
+})
+
+function getDoTaskData(incom,res,task){
+   return PartsModel.findOne({task_id:task.id}).where('device').equals('no').exec(function(err,parts){
+      if(err || !parts)errorHandler(res,err,'There is no free parts for this task');
+      else {
+         return PartsModel.findOneAndUpdate({id:parts.id},{device:incom.device_id},function(err,parts){
+            if(err || !parts)errorHandler(res,err,'There is no free parts for this task');
+            else {
+               return res.send({type:task.type,data:parts.data,part:parts.id});
+            }
+         });
+      }
+   })
+}
+
+router.get('/dotask',function(req,res,next){
+   var incom = req.body;
+
+   return TaskModel.findOne({id:incom.id_task},function(err,task){
+      if(err || !task)errorHandler(res,err,'There is no task');
+      else {
+         return postDoTaskData(incom,res,task);
+      }
+   })
+})
+
+function postDoTaskData(incom,res,task){
+   return PartsModel.findOne({task_id:task.id}).where('device').equals(incom.device_id).exec(function(err,parts){
+      if(err || !parts)errorHandler(res,err,'There is no such parts for this task');
+      else {
+         return PartsModel.findOneAndUpdate({id:parts.id},{result : incom.result},function(err,parts){
+            if(err || !parts)errorHandler(res,err,'There is such parts for this task');
+            else {
+               return res.send('ok');
+            }
+         });
+      }
+   })
+}
+
+router.post('/addtask',function(req,res,next){
+   var incom = req.body;
 })
 
 function errorHandler(res,err,message){

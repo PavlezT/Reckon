@@ -1,6 +1,6 @@
 import { Component,  Inject } from '@angular/core';
 import { Http } from '@angular/http';
-import { NavController, AlertController, ToastController } from 'ionic-angular';
+import { NavController, AlertController, ToastController, Events } from 'ionic-angular';
 import { Device } from 'ionic-native';
 import 'rxjs/add/operator/toPromise';
 import 'rxjs/add/operator/timeout';
@@ -16,7 +16,7 @@ export class Tasks {
    tasks : any;
    selectedTask : any;
 
-  constructor(public navCtrl: NavController,public alertCtrl: AlertController, public toastCtrl: ToastController,@Inject(Http) public http : Http) {
+  constructor(public navCtrl: NavController,public alertCtrl: AlertController,public events: Events, public toastCtrl: ToastController,@Inject(Http) public http : Http) {
       this.getTasks().then(data =>{this.tasks = data;} );
   }
 
@@ -79,6 +79,7 @@ export class Tasks {
       this.http.post(url,data).timeout(consts.timeout).retry(consts.retry).toPromise()
          .then(res => {
             console.log('res',res);
+            this.events.publish('task:activated');
          })
          .catch(error=>{
             console.error('<Tasks> changeActiveTask error:',error)
