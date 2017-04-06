@@ -78,8 +78,8 @@ export class Tasks {
 
       this.http.post(url,data).timeout(consts.timeout).retry(consts.retry).toPromise()
          .then(res => {
-            console.log('res',res);
-            this.events.publish('task:activated');
+            if(res)this.events.publish('task:activated');
+            else throw new Error('There is no task')
          })
          .catch(error=>{
             console.error('<Tasks> changeActiveTask error:',error)

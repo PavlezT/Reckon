@@ -41,7 +41,7 @@ var Part = new Schema({
    task_id : { type: String, required : true },
    data : Schema.Types.Mixed,
    result : Schema.Types.Mixed,
-   device : { type : String, required : false, default : 'no' }
+   device : { type : String, required : false, default : null }
 })
 
 // validation
@@ -62,7 +62,7 @@ var PartsModel = mongoose.model('Part',Part);
 //   }
 // });
 
-// var part = new PartsModel({task_id:'44ec3e40-0cb0-11e7-931e-6dcf296d1c23',data:'lorem ipsum'});
+// var part = new PartsModel({task_id:'44ec3e40-0cb0-11e7-931e-6dcf296d1c23',data:'lOrem iPSum',device : '123'});
 // part.save(function(err){
 //    if(err)console.log('error part save',err)
 //    else console.log('saved')
