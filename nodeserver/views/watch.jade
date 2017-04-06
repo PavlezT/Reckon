@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1  #{task.title}
+  div Status
+   span(style="font-weight: 700;")  #{task.status}
+  p Welcome to 'Watch task'
+  br
+  p Id: #{task.id}
+  p Type: #{task.type}
+  p Authore: #{task.author}
+  p Description: #{task.description}
+  p Created: #{task.created}
+  p(style="word-break: break-word;") Result: #{task.result || 'Not calculated yet'}
+  p(style="word-break: break-word;") Data: #{task.data}

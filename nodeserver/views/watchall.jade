@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1 All tasks
+  p Welcome to All tasks. Please select task to watch
+  form(action="watch",method="POST")
+   select(name="task_id")
+      each task, i in tasks
+         option(value=task.id) #{task.title}
+   br
+   br
+   button(type="submit") Submit

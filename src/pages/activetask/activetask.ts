@@ -34,9 +34,7 @@ export class ActiveTask {
     cordova.plugins.backgroundMode.overrideBackButton();
 
     events.subscribe('task:activated', () => {
-      // if(window.localStorage.getItem('task') == 'true'){
-      //    this.showToast('Can`t start new task before ')
-      // }
+      if(!this.worker)this.worker = new Worker;
       this.start();
     });
     this.start();

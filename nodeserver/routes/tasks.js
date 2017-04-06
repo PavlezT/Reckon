@@ -2,12 +2,15 @@ var express = require('express');
 var TaskModel    = require('../libs/mongoose').TaskModel;
 var DeviceModel    = require('../libs/mongoose').DeviceModel;
 var PartsModel = require('../libs/mongoose').PartsModel;
+var types = require('../libs/mongoose').types;
 var log         = require('../libs/log')(module);
+var taskDevider = require('../libs/taskdevider');
 var router = express.Router();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-   res.send('all tasks');
+   res.render('index',{title:'Tasks'});
+   //taskDevider.FBL.reduce({id : '1b36b5d0-1b0b-11e7-b559-8f78b44f507a'})
  //  return TaskModel.findOneAndUpdate({type:null},{type:'FBL'},function(err,data){
  //     return res.send({error:err,data:data});
  // })
@@ -63,7 +66,7 @@ router.get('/active',function(req,res,next){
    return DeviceModel.findOne({uuid:incom.id_device},function(err,device){
       if(err || !device)errorHandler(res,err,'Can`t find device')
       else {
-         return TaskModel.findOne({id: device.working_task},function(err,task){
+         return TaskModel.findOneAndUpdate({id: device.working_task},{status:'activated'},function(err,task){
             if(err || !task){
                res.statusCode = 400;
                log.error('<TaskModel> (%d) find: %s',res.statusCode,JSON.stringify(err));
@@ -80,7 +83,7 @@ router.get('/active',function(req,res,next){
 router.get('/dotask',function(req,res,next){
    var incom = req.query;
 
-   return TaskModel.findOne({id:incom.id_task},function(err,task){
+   return TaskModel.findOneAndUpdate({id:incom.id_task},{status:'running'},function(err,task){
       if(err || !task)errorHandler(res,err,'There is no task');
       else {
          return getDoTaskData(incom,res,task);
@@ -131,24 +134,44 @@ function postDoTaskData(incom,res,task,next){
    })
 }
 
+router.get('/watch',function(req,res,next){
+   TaskModel.find({},function(err,tasks){
+      if(err || !tasks)errorHandler(res,err,'Error watching tasks');
+      else res.render('watchall',{tasks:tasks});
+   })
+})
+
+router.post('/watch',function(req,res,next){
+   TaskModel.findOne({id:req.body.task_id},function(err,task){
+      if(err || !task)errorHandler(res,err,'Task error or there is no such task');
+      else res.render('watch',{task:task});
+   })
+})
+
 router.get('/addtask',function(req,res,next){
-   res.render('task', { title: 'Create new task' });
+   res.render('task', { title: 'Create new task',types:types });
 })
 
 router.post('/addtask',function(req,res,next){
    var incom = req.body;
-
-   return TaskModel.findOne({title:incom.title},function(err,task){
-      if(err || task)errorHandler(res,err,'Error while saving. Task with this title already exists');
-      else {
-         var new_task = new TaskModel({title: incom.title,author:incom.author,description:incom.description,type : incom.type,data : incom.data});
-         new_task.save(function(err){
-            if(err)errorHandler(res,err,'Can`t save new task');
-            else res.send('Sucess, your task has been added');
-         })
-      }
-   })
-
+   console.log(incom)
+   if(!(incom.title && incom.data && incom.author && incom.type)){
+      res.send('Errro.Input all needed fields');
+   } else {
+      return TaskModel.findOne({title:incom.title},function(err,task){
+         if(err || task)errorHandler(res,err,'Error while saving. Task with this title already exists');
+         else {
+            var new_task = new TaskModel({title: incom.title,author:incom.author,description:incom.description,type : incom.type,data : incom.data});
+            new_task.save(function(err,createdtask){
+               if(err)errorHandler(res,err,'Can`t save new task');
+               else {
+                  res.send('Sucess, your task has been added');
+                  taskDevider[createdtask.type] && taskDevider[createdtask.type].map(createdtask);
+               }
+            })
+         }
+      })
+   }
 })
 
 function errorHandler(res,err,message){

@@ -21,6 +21,7 @@ var Task = new Schema({
     description: { type: String, required: false },
     type : { type: String, required: true },
     data : Schema.Types.Mixed,
+    result : Schema.Types.Mixed,
     id : { type: String, required : false, default: uuid.v1 },
     created : { type: Date, default: Date.now },
     status : { type : String, default : 'New' }
@@ -62,7 +63,7 @@ var PartsModel = mongoose.model('Part',Part);
 //   }
 // });
 
-// var part = new PartsModel({task_id:'44ec3e40-0cb0-11e7-931e-6dcf296d1c23',data:'lOrem iPSum',device : '123'});
+// var part = new PartsModel({task_id:'44ec3e40-0cb0-11e7-931e-6dcf296d1c23',data:'lOrem iPSum'});
 // part.save(function(err){
 //    if(err)console.log('error part save',err)
 //    else console.log('saved')
@@ -71,3 +72,9 @@ var PartsModel = mongoose.model('Part',Part);
 module.exports.TaskModel = TaskModel;
 module.exports.DeviceModel = DeviceModel;
 module.exports.PartsModel = PartsModel;
+
+module.exports.types = [
+   {name:'FBL',description:'Find Big Letters'},
+   {name:'FSL',description:'Find Small Letters'},
+   {name:'CF',description:'Calc factorial'}
+]

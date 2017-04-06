@@ -1,7 +1,9 @@
 doctype html
 html
   head
-    title= title
+    title= title || 'Tasks' 
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
+    a(href="/tasks/watch") All tasks
+    a(href="/tasks/addtask") Add new task
     block content

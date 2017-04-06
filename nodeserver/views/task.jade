@@ -11,7 +11,10 @@ block content
    p Description
    textarea(name="description")
    p Type
-   input(name="type")
+   select(name="type")
+      each type,i in  types
+         option(value="#{type.name}") #{type.name}
+         option(disabled=true) #{type.description}
    p Data
    textarea(name="data")
    br
