@@ -3,19 +3,22 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
-  form(action="addtask",method="POST")
-   p Title
-   input(name="title")
-   p Authore
-   input(name="author")
-   p Description
-   textarea(name="description")
-   p Type
-   select(name="type")
-      each type,i in  types
-         option(value="#{type.name}") #{type.name}
-         option(disabled=true) #{type.description}
-   p Data
-   textarea(name="data")
-   br
-   button(type="submit") Submit
+  if !message
+   form(action="addtask",method="POST")
+    p Title
+    input(name="title")
+    p Authore
+    input(name="author")
+    p Description
+    textarea(name="description")
+    p Type
+    select(name="type")
+        each type,i in  types
+          option(value="#{type.name}") #{type.name}
+          option(disabled=true) #{type.description}
+    p Data
+    textarea(name="data")
+    br
+    button(type="submit") Submit
+  else
+    p #{message}

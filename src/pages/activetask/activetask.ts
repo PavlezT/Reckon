@@ -51,16 +51,19 @@ export class ActiveTask {
   private start() : void {
      this.getActiveTask()
           .then((status)=>{
-             return status ? this.getTaskData() : Promise.resolve(false);
+             return status ? this.getTaskData() : Promise.reject('get Task Data error');
           })
           .then(data=>{
-             return data ? this.worker.task(data.type,data.data,data.part) : Promise.resolve(false);
+             return data ? this.worker.task(data.type,data.data,data.part) : Promise.reject('worker task error');
           })
           .then(result=>{
-             return result ? this.postTaskData(result) : Promise.resolve(false);
+             return result ? this.postTaskData(result) : Promise.reject('post task data error');
           })
           .then(state=>{
              state && this.start();
+          })
+          .catch(err=>{
+            console.log('<ActiveTask> start error:',err)
           })
  }
 
@@ -85,7 +88,7 @@ export class ActiveTask {
         let data = error.json();
         console.log('<ActiveTask> getActiveTask error:', data.error || error);
         this.showToast('Can`t active this task on your device. Try another task or wait some minets.')
-        this.device_status = 'stoped' || 'unknown';
+        this.device_status = 'stopped' || 'unknown';
         return false;
       })
   }
@@ -101,7 +104,7 @@ export class ActiveTask {
       })
       .catch(error=>{
          console.error('<ActiveTask> getTaskData error:',error);
-         this.device_status = 'stoped';
+         this.device_status = 'stopped';
          this.showToast('Try another task. This task is may to be finished or off from running.')
          return false;
       })
@@ -117,7 +120,7 @@ export class ActiveTask {
      }
      return this.http.post(url,resp_data).timeout(consts.timeout).retry(consts.retry).toPromise()
      .catch(error=>{
-        this.device_status = 'stoped';
+        this.device_status = 'stopped';
         console.log('<ActiveTask> postTaskData error:',error)
         return false;
      })

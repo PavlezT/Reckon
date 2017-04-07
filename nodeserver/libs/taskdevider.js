@@ -19,19 +19,17 @@ module.exports.FBL={
       var data = incomdata || [];
 
       PartsModel.findOne({task_id:task.id},function(err,part){
-         console.log('parts',part)
          if(err || !part){
-            errorHandler(err,'FBL reduce error',task);
-            if(incomdata){
+            err && errorHandler(err,'FBL reduce error',task);
+            if(!err && incomdata){
                TaskModel.findOneAndUpdate({id:task.id},{result:data,status:'Done'},function(err){
                   if(err)errorHandler(err,'FBL reduce error result save task',task);
                })
             }
          }
-         else if(!part.result)errorHandler({},'FBL there is part without result');
+         else if(!part.result)errorHandler({},'FBL there is part without result',part);
          else {
             data.push(part.result);
-            console.log('data pushed',data);
             PartsModel.remove({id:part.id},function(err){
                console.log('removed');
                if(err)errorHandler(err,'FBL error removing part',task);
@@ -58,6 +56,19 @@ module.exports.CF = {
    reduce : function(task,incom){
 
    }
+}
+
+module.exports.ballance = function(task,incom,res,sendPartError,sendPart){//sendPartError(err,res,incom) || sendPart(part,incom,res)
+    return PartsModel.findOne({task_id:task.id}).where('result').equals(null).exec(function(err,part){
+        if(err)return sendPartError(err,res,incom);
+        else if(!part){
+            sendPartError({error:'There is no parts'},res,incom);
+            module.exports[task.type].reduce(task);
+        } else {
+            sendPart(task,part,incom,res);
+            return PartsModel.findOneAndUpdate({id:part.id},{device:incom.device_id},function(err){if(err)errorHandler(err,'updating device id in part error',part)});
+        }
+    })
 }
 
 function errorHandler(err,message,task){

@@ -33,7 +33,7 @@ var Device = new Schema({
    serial : {type : String, required : false},
    platform : {type : String, required : true},
    name: {type : String, required : true},
-   status : { type : String, required : false, default : 'online'},
+   status : { type : String, required : false, default : 'new'},
    working_task : {type : String, required : false}
 })
 

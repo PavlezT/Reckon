@@ -9,7 +9,7 @@ var router = express.Router();
 
 router.get('/', function(req, res, next) {
    res.render('watchall',{title:'Tasks'});
-   //taskDevider.FBL.reduce({id : '5f4852d0-1b6d-11e7-9bfc-7d5a49c658a5'})
+  //taskDevider.FBL.reduce({id : '33ab9890-1b8a-11e7-bb4b-b76cae651ad5'})
  //  return TaskModel.findOneAndUpdate({type:null},{type:'FBL'},function(err,data){
  //     return res.send({error:err,data:data});
  // })
@@ -42,20 +42,17 @@ router.post('/active',function(req,res,next){
         if (err || !device.length ) {
            errorHandler(res,err, 'There are no Devices with this id');
         } else {
-
-        return TaskModel.find({id:incom.id_task},function(err,task){
-           if (err || !task.length ) {
-              errorHandler(res,err,'There are no tasks with this id' );
-           }else{
-
-           return DeviceModel.findOneAndUpdate({uuid:incom.id_device},{status : 'working', working_task : incom.id_task},function(err){
-             if(err)errorHandler(res,err,'Can`t save task to this device');
-             else
-               return res.send('Ok');
-          })
+            return TaskModel.find({id:incom.id_task}).where('status').ne('Done').exec(function(err,task){
+                if (err || !task || !task.length ) {
+                    errorHandler(res,err,'There are no active tasks with this id' );
+                } else {
+                        return DeviceModel.findOneAndUpdate({uuid:incom.id_device},{status : 'activated', working_task : incom.id_task},function(err){
+                            if(err)errorHandler(res,err,'Can`t save task to this device');
+                            else return res.send('Ok');
+                        })
+                }
+            })
          }
-        })
-     }
     })
 })
 
@@ -65,14 +62,15 @@ router.get('/active',function(req,res,next){
    return DeviceModel.findOne({uuid:incom.id_device},function(err,device){
       if(err || !device)errorHandler(res,err,'Can`t find device')
       else {
-         return TaskModel.findOneAndUpdate({id: device.working_task},{status:'activated'},function(err,task){
+         return TaskModel.findOne({id: device.working_task}).where('status').ne('Done').exec(function(err,task){
             if(err || !task){
                res.statusCode = 400;
                log.error('<TaskModel> (%d) find: %s',res.statusCode,JSON.stringify(err));
-               return res.send({ error: err, device : device });
+               return res.send({err:'This is not active task'});
             }
             else {
                return res.send({task:task,device:device});
+               if(task.status == 'New')TaskModel.findOneAndUpdate({id:device.working_task},{status:'Activated'},function(err){if(err)console.log('<Tasks> get /active: Task status update error:',err)})
             }
          })
       }
@@ -82,7 +80,7 @@ router.get('/active',function(req,res,next){
 router.get('/dotask',function(req,res,next){
    var incom = req.query;
 
-   return TaskModel.findOneAndUpdate({id:incom.id_task},{status:'running'},function(err,task){
+   return TaskModel.findOneAndUpdate({id:incom.id_task},{status:'Running'},function(err,task){
       if(err || !task)errorHandler(res,err,'There is no task');
       else {
          return getDoTaskData(incom,res,task);
@@ -92,16 +90,27 @@ router.get('/dotask',function(req,res,next){
 
 function getDoTaskData(incom,res,task){
    return PartsModel.findOne({task_id:task.id,$or:[{device:null},{device:incom.device_id}]}).where('result').equals(null).exec(function(err,parts){//.where('device').equals(null).where('device').equals(incom.device_id)
-      if(err || !parts)errorHandler(res,err,'There is no free parts for this task');
-      else {
-         return PartsModel.findOneAndUpdate({id:parts.id},{device:incom.device_id},function(err,parts){
-            if(err || !parts)errorHandler(res,err,'There is no free parts for this task');
-            else {
-               return res.send({type:task.type,data:parts.data,part:parts.id,result:parts.result});
-            }
-         });
+      if(err){
+         return sendPartError(err,res,incom);
+      } else {
+         return parts ? sendPart(task,parts,incom,res) : taskDevider.ballance(task,incom,res,sendPartError,sendPart);
       }
    })
+}
+
+function sendPartError(err,res,incom){
+    errorHandler(res,err,'There is no free parts for this task');
+    return DeviceModel.findOneAndUpdate({uuid:incom.device_id},{status:'stopped'},function(err,data){if(err)console.log('<Tasks> get /dotask: error updating device status to stopped:',{err:err,device:data})});
+}
+
+function sendPart(task,part,incom,res){
+    return PartsModel.findOneAndUpdate({id:part.id},{device:incom.device_id},function(err,parts){
+            if(err || !parts)errorHandler(res,err,'There is no free parts for this task');
+            else {
+               res.send({type:task.type,data:parts.data,part:parts.id,result:parts.result});
+               return DeviceModel.findOneAndUpdate({uuid:incom.device_id},{status:'working'},function(err,device){if(err)console.log('<Tasks> get /dotask: error updating device status to working:',{err:err,device:device})});
+            }
+         });
 }
 
 router.post('/dotask',function(req,res,next){
@@ -149,7 +158,7 @@ router.get('/addtask',function(req,res,next){
 
 router.post('/addtask',function(req,res,next){
    var incom = req.body;
-   console.log(incom)
+
    if(!(incom.title && incom.data && incom.author && incom.type)){
       res.send('Errro.Input all needed fields');
    } else {
@@ -160,7 +169,7 @@ router.post('/addtask',function(req,res,next){
             new_task.save(function(err,createdtask){
                if(err)errorHandler(res,err,'Can`t save new task');
                else {
-                  res.send('Sucess, your task has been added');
+                  res.render('task',{title:'Saved',message:'Sucess, your task has been added'});
                   taskDevider[createdtask.type] && taskDevider[createdtask.type].map(createdtask);
                }
             })

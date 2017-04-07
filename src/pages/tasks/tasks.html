@@ -13,6 +13,7 @@
    <ion-list *ngFor="let task of tasks">
       <ion-item (click)="taskClicked(task)">
          <h3>{{task.title}}</h3>
+         <p>status: {{task.status}}
          <p>id:{{task.id}}</p>
          <p *ngIf="task.description">Description : {{task.description}}</p>
          <p *ngIf="task.author">Author : {{task.author}}</p>

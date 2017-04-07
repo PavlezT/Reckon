@@ -23,7 +23,7 @@ export class Tasks {
   public getTasks() : Promise<any> {
      let url = `${consts.url}/tasks/all`;
 
-     return this.http.get(url).toPromise()
+     return this.http.get(url).timeout(consts.timeout).retry(consts.retry).toPromise()
       .then(data => {return data.json()})
       .catch(error => {
          console.error('<Tasks> getTasks error:',error);
