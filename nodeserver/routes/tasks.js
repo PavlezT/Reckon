@@ -7,10 +7,9 @@ var log         = require('../libs/log')(module);
 var taskDevider = require('../libs/taskdevider');
 var router = express.Router();
 
-/* GET users listing. */
 router.get('/', function(req, res, next) {
-   res.render('index',{title:'Tasks'});
-   //taskDevider.FBL.reduce({id : '1b36b5d0-1b0b-11e7-b559-8f78b44f507a'})
+   res.render('watchall',{title:'Tasks'});
+   //taskDevider.FBL.reduce({id : '5f4852d0-1b6d-11e7-9bfc-7d5a49c658a5'})
  //  return TaskModel.findOneAndUpdate({type:null},{type:'FBL'},function(err,data){
  //     return res.send({error:err,data:data});
  // })
@@ -95,10 +94,6 @@ function getDoTaskData(incom,res,task){
    return PartsModel.findOne({task_id:task.id,$or:[{device:null},{device:incom.device_id}]}).where('result').equals(null).exec(function(err,parts){//.where('device').equals(null).where('device').equals(incom.device_id)
       if(err || !parts)errorHandler(res,err,'There is no free parts for this task');
       else {
-          // return res.send(parts)
-         // return PartsModel.remove({task_id:parts.task_id},function(err,data){
-         //    return res.send({error:err,data:data});
-         // })
          return PartsModel.findOneAndUpdate({id:parts.id},{device:incom.device_id},function(err,parts){
             if(err || !parts)errorHandler(res,err,'There is no free parts for this task');
             else {
@@ -127,7 +122,7 @@ function postDoTaskData(incom,res,task,next){
          return PartsModel.findOneAndUpdate({id:parts.id},{result : incom.result},function(err,parts){
             if(err || !parts)errorHandler(res,err,'There is such parts for this task or can`t save data');
             else {
-               return res.send('ok');// && next(task.id);
+               return res.send('ok');
             }
          });
       }

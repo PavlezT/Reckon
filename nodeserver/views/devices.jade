@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  h1 All Devices
+  p Welcome to All devices. Please select device
+  if devices
+    form(action="/devices/all",method="GET")
+        select(name="device_uuid")
+            each device, i in devices
+                option(value=device.uuid) #{device.name}
+        br
+        br
+        button(type="submit") Submit
+    br
+    br
+    if alonedevice
+        p Status: #{devices[0].status}
+        p UUID: #{devices[0].uuid}
+        p Name: #{devices[0].name}
+        p Working task id: #{devices[0].working_task}
+        p Platform: #{devices[0].platform}
+  else
+    a(href="/devices/all") All devices

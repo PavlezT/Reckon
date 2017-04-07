@@ -31,6 +31,10 @@ export class Tasks {
       })
   }
 
+  public doRefresh(refresher:any) : void {
+    this.getTasks().then(data =>{this.tasks = data;refresher.complete();});
+  }
+
    public taskClicked(task) : void {
        this.selectedTask = task;
        this.showPrompt();

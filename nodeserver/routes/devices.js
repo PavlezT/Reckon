@@ -5,9 +5,10 @@ var router = express.Router();
 
 /* GET users listing. */
 router.get('/all', function(req, res, next) {
-   return DeviceModel.find(function (err, devices) {
+   var search = req.query.device_uuid? {uuid:req.query.device_uuid} : {};
+   return DeviceModel.find(search,function (err, devices) {
        if (!err) {
-            return res.send(devices);
+            return res.render('devices',{title:'Devices',devices:devices,alonedevice:req.query.device_uuid});
        } else {
             res.statusCode = 400;
             log.error('<DeviceModel> (%d): %s',res.statusCode,JSON.stringify(err));
@@ -15,6 +16,10 @@ router.get('/all', function(req, res, next) {
        }
    });
 });
+
+router.get('/',function(req,res,next){
+    res.render('devices',{title:'Devices'});
+})
 
 router.post('/',function(req,res,next){
    var incom = req.body;
