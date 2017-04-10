@@ -42,20 +42,107 @@ module.exports.FBL={
 
 module.exports.FSL = {
    map : function(task){
-
+      var data = task.data;
+      var step = 40;
+      for(var i=0; i < data.length; i= i + step){
+         var part_data = data.substring(i,i+step);
+         var part = new PartsModel({task_id:task.id,data:part_data});
+         part.save(function(err){
+            if(err)errorHandler(err,'FSL map error',task);
+            else console.log('saved: ',part.id)
+         })
+      }
    },
-   reduce : function(task,incom){
+   reduce : function(task,incomdata){
+      var data = incomdata || [];
 
+      PartsModel.findOne({task_id:task.id},function(err,part){
+         if(err || !part){
+            err && errorHandler(err,'FSL reduce error',task);
+            if(!err && incomdata){
+               TaskModel.findOneAndUpdate({id:task.id},{result:data,status:'Done'},function(err){
+                  if(err)errorHandler(err,'FSL reduce error result save task',task);
+               })
+            }
+         }
+         else if(!part.result)errorHandler({},'FSL there is part without result',part);
+         else {
+            data.push(part.result);
+            PartsModel.remove({id:part.id},function(err){
+               console.log('removed');
+               if(err)errorHandler(err,'FSL error removing part',task);
+               else module.exports.FBL.reduce(task,data);
+            })
+         }
+      })
    }
 }
 
 module.exports.CF = {
    map: function(task){
-      console.log('CF')
+        var data = task.data;
+
+        for(var i=0;  data-i > 1; i=i+2){
+            var part_data = [data-i,data-i-1];
+            var part = new PartsModel({task_id:task.id,data:part_data});
+            part.save(function(err){
+                if(err)errorHandler(err,'CF map error',task);
+                else console.log('saved: ',{id:part.id,part_data:part_data})
+            })
+        }
    },
    reduce : function(task,incom){
+        var data = incom || 1;
+        PartsModel.findOne({task_id:task.id},function(err,part){
+            if(err)errorHandler(err,'CF error reduce',task);
+            else if(!part && incom){
+                TaskModel.findOneAndUpdate({id:task.id},{result:data,status:'Done'},function(err){
+                  if(err)errorHandler(err,'CF reduce error result save task',task);
+               })
+            } else {
+                data = data * part.result;
+                PartsModel.remove({id:part.id},function(err){
+                    console.log('removed:',part.id);
+                    if(err)errorHandler(err,'CF error removing part',task);
+                    module.exports.CF.reduce(task,data);
+                })
+            }
+        })
+      }
+}
 
-   }
+module.exports.E = {
+    map: function(task){
+        var number = task.data.substring(0,task.data.indexOf(','));
+        var power = task.data.substring(task.data.indexOf(',')+1,task.data.length);
+
+        for(var i = 0; power - i > 0;i=i+1){
+            var part_data = [number,power-i];
+            var part = new PartsModel({task_id:task.id,data:part_data});
+            part.save(function(err) {
+                if(err)errorHandler(err,'E map error',task);
+                else console.log('saved: ',{id:part.id,part_data:part_data})
+            })
+        }
+    },
+    reduce: function(task,incom){
+        var data = incom || 1;
+        PartsModel.findOne({task_id:task.id},function(err,part){
+            if(err)errorHandler(err,'E error reduce',task);
+            else if((!part && incom )){
+                TaskModel.findOneAndUpdate({id:task.id},{result:data,status:'Done'},function(err){
+                  if(err)errorHandler(err,'E reduce error result save task',task);
+               })
+            } else if(part) {
+                data = data * part.result;
+                PartsModel.remove({id:part.id},function(err){
+                    console.log('removed:',part.id);
+                    if(err)errorHandler(err,'E error removing part',task);
+                    module.exports.E.reduce(task,data);
+                })
+            }
+        })
+      }
 }
 
 module.exports.ballance = function(task,incom,res,sendPartError,sendPart){//sendPartError(err,res,incom) || sendPart(part,incom,res)

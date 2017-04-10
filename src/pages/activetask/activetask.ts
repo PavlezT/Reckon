@@ -94,7 +94,7 @@ export class ActiveTask {
         this.showToast('Can`t active this task on your device. Try another task or wait some minets.')
         //this.singleValue = 0;
         this.device_status = 'stopped';
-        return false;
+        return Promise.reject('No active task');
       })
   }
 
@@ -111,7 +111,7 @@ export class ActiveTask {
          console.error('<ActiveTask> getTaskData error:',error);
          this.device_status = 'stopped';
          this.showToast('Try another task. This task is may to be finished or off from running.')
-         return false;
+         return Promise.reject('No part data');
       })
   }
 
@@ -127,7 +127,7 @@ export class ActiveTask {
      .catch(error=>{
         this.device_status = 'stopped';
         console.log('<ActiveTask> postTaskData error:',error)
-        return false;
+        return Promise.reject('Can`t post part data');
      })
  }
 

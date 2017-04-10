@@ -9,9 +9,9 @@ var router = express.Router();
 
 router.get('/', function(req, res, next) {
    res.render('watchall',{title:'Tasks'});
-   
-   taskDevider.reCalcTotal({id:'7bbbeca0-1dbc-11e7-b162-079cbf1d0f50'});
-  //taskDevider.FBL.reduce({id : '33ab9890-1b8a-11e7-bb4b-b76cae651ad5'})
+   //taskDevider.E.map({id:'c00f7bd0-1df6-11e7-ab41-8d07b61985d8',data:'2,15'})
+   //taskDevider.reCalcTotal({id:'7bbbeca0-1dbc-11e7-b162-079cbf1d0f50'});
+   //taskDevider.FBL.reduce({id : '33ab9890-1b8a-11e7-bb4b-b76cae651ad5'})
     // TaskModel.findOne({id:'7bbbeca0-1dbc-11e7-b162-079cbf1d0f50'},function(err,task){
     //      taskDevider.FBL.map(task)
     // })
@@ -22,6 +22,7 @@ router.get('/', function(req, res, next) {
    //    if(err)res.send({error:err})
    //    else res.send({data:data})
    // });
+   //PartsModel.remove({task_id:'6ed09a80-1df4-11e7-9d0a-b7dbedde99c6'},function(err){})
 });
 
 router.get('/taskparts',function(req,res,next){

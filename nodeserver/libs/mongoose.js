@@ -77,5 +77,6 @@ module.exports.PartsModel = PartsModel;
 module.exports.types = [
    {name:'FBL',description:'Find Big Letters'},
    {name:'FSL',description:'Find Small Letters'},
-   {name:'CF',description:'Calc factorial'}
+   {name:'CF',description:'Calc factorial'},
+   {name:'E',description:'Elevate. example: \'6,3\' '}
 ]
