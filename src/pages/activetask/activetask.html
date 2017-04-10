@@ -7,13 +7,21 @@
 </ion-header>
 
 <ion-content>
-   <h3 *ngIf="!task">There is no active task</h3>
+   <h3 padding *ngIf="!task">There is no active task</h3>
    <ion-item *ngIf="task" >
       <h3>{{task.title}}</h3>
+      <p>Status: {{task.status}}</p>
       <p>id:{{task.id}}</p>
       <p *ngIf="task.description">Description : {{task.description}}</p>
       <p *ngIf="task.author">Author : {{task.author}}</p>
       <p>Created: {{task.created}}</p>
+   </ion-item>
+   <ion-item>
+      <ion-label>Total: {{singleValue}}%</ion-label>
+      <ion-range [(ngModel)]="singleValue" color="secondary" disabled>
+        <ion-label range-left>0%</ion-label>
+        <ion-label range-right>100%</ion-label>
+      </ion-range> 
    </ion-item>
    <p padding>Device status: {{device_status}}</p>
 

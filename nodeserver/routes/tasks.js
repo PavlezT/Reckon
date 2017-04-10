@@ -9,10 +9,15 @@ var router = express.Router();
 
 router.get('/', function(req, res, next) {
    res.render('watchall',{title:'Tasks'});
+   
+   taskDevider.reCalcTotal({id:'7bbbeca0-1dbc-11e7-b162-079cbf1d0f50'});
   //taskDevider.FBL.reduce({id : '33ab9890-1b8a-11e7-bb4b-b76cae651ad5'})
- //  return TaskModel.findOneAndUpdate({type:null},{type:'FBL'},function(err,data){
- //     return res.send({error:err,data:data});
- // })
+    // TaskModel.findOne({id:'7bbbeca0-1dbc-11e7-b162-079cbf1d0f50'},function(err,task){
+    //      taskDevider.FBL.map(task)
+    // })
+    // PartsModel.findOneAndUpdate({task_id:'7bbbeca0-1dbc-11e7-b162-079cbf1d0f50',result:null},{result : 'bla bla bla'},function(err,part){
+    //     if(!err)console.log('part updated')
+    // })
    // return TaskModel.remove({title:req.query.title},function(err,data){
    //    if(err)res.send({error:err})
    //    else res.send({data:data})
@@ -131,7 +136,8 @@ function postDoTaskData(incom,res,task,next){
          return PartsModel.findOneAndUpdate({id:parts.id},{result : incom.result},function(err,parts){
             if(err || !parts)errorHandler(res,err,'There is such parts for this task or can`t save data');
             else {
-               return res.send('ok');
+                res.send('ok');
+                taskDevider.reCalcTotal(task);
             }
          });
       }

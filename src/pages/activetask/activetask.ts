@@ -18,9 +18,11 @@ export class ActiveTask {
   task: any;
   worker : Worker;
   device_status: String;
-  //private backgroundMode: BackgroundMode,
+  singleValue : number;
+  
   constructor(public platform: Platform, public navCtrl: NavController, public toastCtrl: ToastController, public events: Events, @Inject(Http) public http: Http) {
     this.worker = new Worker;
+    this.singleValue = 0;
     cordova.plugins.backgroundMode.enable();
     cordova.plugins.backgroundMode.setDefaults({
       title: 'Reckon',
@@ -76,11 +78,13 @@ export class ActiveTask {
         let task = data.task;
         this.task = {
           id: task.id || '',
+          status: task.status || 'unknown',
           title: task.title || '',
           created: task.created || '',
           author: task.author || '',
           description: task.description || ''
         }
+        this.singleValue = task.total || 0;
         this.device_status = 'working' ;// data.device.status;
         return true;
       })
@@ -88,7 +92,8 @@ export class ActiveTask {
         let data = error.json();
         console.log('<ActiveTask> getActiveTask error:', data.error || error);
         this.showToast('Can`t active this task on your device. Try another task or wait some minets.')
-        this.device_status = 'stopped' || 'unknown';
+        //this.singleValue = 0;
+        this.device_status = 'stopped';
         return false;
       })
   }

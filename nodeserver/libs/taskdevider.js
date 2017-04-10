@@ -63,11 +63,27 @@ module.exports.ballance = function(task,incom,res,sendPartError,sendPart){//send
         if(err)return sendPartError(err,res,incom);
         else if(!part){
             sendPartError({error:'There is no parts'},res,incom);
+            TaskModel.findOneAndUpdate({id:task.id},{status:'Reducing'},function(err,data){if(err)errorHandler(err,'Ballance error updating status',task)})
             module.exports[task.type].reduce(task);
         } else {
             sendPart(task,part,incom,res);
             return PartsModel.findOneAndUpdate({id:part.id},{device:incom.device_id},function(err){if(err)errorHandler(err,'updating device id in part error',part)});
         }
+    })
+}
+
+module.exports.reCalcTotal = function(task){
+    PartsModel.count({task_id:task.id},function(err,countAll){
+        if(err)errorHandler(err,'Counts all parts error',task);
+        else PartsModel.count({task_id:task.id}).where('result').ne(null).exec(function(err,count){
+            if(err)errorHandler(err,'Counts result parts error',task);
+            else {
+                var total = countAll > 0 ? (count * 100)/countAll : 0;
+                TaskModel.findOneAndUpdate({id:task.id},{total:total.toFixed(2)},function(err,data){
+                    if(err)errorHandler(err,'Update task total error',{task:task,total:total});
+                })
+            }
+        })
     })
 }
 

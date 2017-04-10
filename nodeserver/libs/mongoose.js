@@ -24,7 +24,8 @@ var Task = new Schema({
     result : Schema.Types.Mixed,
     id : { type: String, required : false, default: uuid.v1 },
     created : { type: Date, default: Date.now },
-    status : { type : String, default : 'New' }
+    status : { type : String, default : 'New' },
+    total: {type: Number,required:false, default:0}
 });
 
 var Device = new Schema({
