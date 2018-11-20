@@ -2,7 +2,7 @@ var mongoose    = require('mongoose');
 var log         = require('./log')(module);
 var uuid = require('node-uuid');
 
-mongoose.connect('mongodb://localhost/test1');
+mongoose.connect('mongodb://computing_admin:qwerty123@ds115553.mlab.com:15553/distributed_computing', {useMongoClient: true}); // mongodb://localhost/test1
 var db = mongoose.connection;
 
 db.on('error', function (err) {
