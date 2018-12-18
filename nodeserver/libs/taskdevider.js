@@ -5,13 +5,16 @@ var log         = require('../libs/log')(module);
 module.exports.FBL={
    map :  function(task){
       var data = task.data;
-      var step = 40;
-      for(var i=0; i < data.length; i= i + step){
-         var part_data = data.substring(i,i+step);
-         var part = new PartsModel({task_id:task.id,data:part_data});
+		var step = 40;
+		console.log('map task: '+task.id, task.title)
+		data = data.split(' ');
+      for(var i=0; i < data.length; i+=5){ //  + step
+			var part_data = data.slice(i, i+5).join(' ')//data[i];//substring(i,i+step);
+			var part = new PartsModel({task_id:task.id,data:part_data});
+			console.log('saved subtask: '+part.id, part_data)
          part.save(function(err){
             if(err)errorHandler(err,'FBL map error',task);
-            else console.log('saved: ',part.id)
+            else console.log('сохарнить subtask: '+part.id, part_data)
          })
       }
    },
